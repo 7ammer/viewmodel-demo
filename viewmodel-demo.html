@@ -1,0 +1,20 @@
+<head>
+  <title>viewmodel-demo</title>
+</head>
+
+<body>
+  {{> demoVM}}
+</body>
+
+<template name="demoVM">
+    <input {{b "value: title"}} type="text">
+    <label {{b "text: title"}} ></label> <!-- DOES UPDATE ON VALUE CHANGE -->
+    <ul>
+    {{#each array}}
+        <li>
+            <input {{b "value: this.item"}} type="text">
+            <label {{b "text: this.item"}} ></label> <!-- DOES NOT UPDATE ON VALUE CHANGE -->
+        </li>
+    {{/each}}
+    </ul>
+</template>
