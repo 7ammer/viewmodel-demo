@@ -10,8 +10,12 @@
     <input {{b "value: title"}} type="text">
     <label {{b "text: title"}}></label>
     <br />
-    <button {{b "click: addFoo"}}>Add Foo</button>
-    <button {{b "click: addBar"}}>Add Bar</button>
+    {{>dynamicForm }}
+</template>
+
+<template name="dynamicForm">
+    <button {{b "click: add('hero','layout.$.hero')"}}>Add Hero</button>
+    <button {{b "click: add('billboard','layout.$.billboard')"}}>Add Billboard</button>
     <ul>
     {{#each collection}}
         {{> arrayItem}}
@@ -24,26 +28,25 @@
     <li>
         <hr />
         <button {{b "click: delete"}}>Del</button>
-
-        {{>Template.dynamic template=item data=itemData }}
+        {{>Template.dynamic template=item data=(getData(_id)) }}
         <hr />
     </li>
 </template>
 
-<template name="foo">
+<template name="hero">
     <div>
-        <div>Foo Item:</div>
+        <div>hero Item:</div>
         <input {{b "value: title"}} type="text">
         <input {{b "value: alignment"}} type="text">
-      <button {{b "click: save"}}>Save</button>
+        <button {{b "click: save('hero')"}}>Save</button>
     </div>
 </template>
 
-<template name="bar">
+<template name="billboard">
     <div>
-        <div>Bar Item:</div>
-        <input {{b "value: text"}} type="text">
-        <input {{b "value: chocolate"}} type="text">
-      <button {{b "click: save"}}>Save</button>
+        <div>billboard Item:</div>
+        <input {{b "value: title"}} type="text">
+        <input {{b "value: background"}} type="text">
+      <button {{b "click: save('billboard')"}}>Save</button>
     </div>
 </template>
