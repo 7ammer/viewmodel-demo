@@ -8,13 +8,45 @@
 
 <template name="demoVM">
     <input {{b "value: title"}} type="text">
-    <label {{b "text: title"}} ></label> <!-- DOES UPDATE ON VALUE CHANGE -->
+    <label {{b "text: title"}}></label>
+    {{title}}
+    <br />
+    <button data-add value="foo">Add Foo</button>
+    <button data-add value="bar">Add Bar</button>
     <ul>
     {{#each array}}
-        <li>
-            <input {{b "value: this.item"}} type="text">
-            <label {{b "text: this.item"}} ></label> <!-- DOES NOT UPDATE ON VALUE CHANGE -->
-        </li>
+        {{> arrayItem}}
     {{/each}}
     </ul>
+    <button id="submit">submit</button>
+</template>
+
+
+
+<template name="arrayItem">
+    <li>
+        <hr />
+        <button {{b "click: parent.array.remove(this)"}}>Del</button>
+        <button move-up>/\</button>
+        <button move-down>\/</button>
+        <input {{b "value: item"}} type="text">
+        {{>Template.dynamic template=item }}
+        <hr />
+    </li>
+</template>
+
+<template name="foo">
+    <div>
+        <div>Foo Item:</div>
+        <input {{b "value: foo.title"}} type="text">
+        <input {{b "value: foo.alignment"}} type="text">
+    </div>
+</template>
+
+<template name="bar">
+    <div>
+        <div>Bar Item:</div>
+        <input {{b "value: bar.text"}} type="text">
+        <input {{b "value: bar.chocolate"}} type="text">
+    </div>
 </template>
