@@ -9,28 +9,23 @@
 <template name="demoVM">
     <input {{b "value: title"}} type="text">
     <label {{b "text: title"}}></label>
-    {{title}}
     <br />
-    <button data-add value="foo">Add Foo</button>
-    <button data-add value="bar">Add Bar</button>
+    <button {{b "click: addFoo"}}>Add Foo</button>
+    <button {{b "click: addBar"}}>Add Bar</button>
     <ul>
-    {{#each array}}
+    {{#each collection}}
         {{> arrayItem}}
     {{/each}}
     </ul>
-    <button id="submit">submit</button>
+    <button {{b "click: submit"}}>submit</button>
 </template>
-
-
 
 <template name="arrayItem">
     <li>
         <hr />
-        <button {{b "click: parent.array.remove(this)"}}>Del</button>
-        <button move-up>/\</button>
-        <button move-down>\/</button>
-        <input {{b "value: item"}} type="text">
-        {{>Template.dynamic template=item }}
+        <button {{b "click: delete"}}>Del</button>
+
+        {{>Template.dynamic template=item data=itemData }}
         <hr />
     </li>
 </template>
@@ -38,15 +33,17 @@
 <template name="foo">
     <div>
         <div>Foo Item:</div>
-        <input {{b "value: foo.title"}} type="text">
-        <input {{b "value: foo.alignment"}} type="text">
+        <input {{b "value: title"}} type="text">
+        <input {{b "value: alignment"}} type="text">
+      <button {{b "click: save"}}>Save</button>
     </div>
 </template>
 
 <template name="bar">
     <div>
         <div>Bar Item:</div>
-        <input {{b "value: bar.text"}} type="text">
-        <input {{b "value: bar.chocolate"}} type="text">
+        <input {{b "value: text"}} type="text">
+        <input {{b "value: chocolate"}} type="text">
+      <button {{b "click: save"}}>Save</button>
     </div>
 </template>
