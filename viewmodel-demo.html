@@ -3,32 +3,69 @@
 </head>
 
 <body>
-  {{> demoVM}}
+  {{> demoVM field="test" shared="pages"}}
 </body>
 
 <template name="demoVM">
-    <input {{b "value: title"}} type="text">
-    <label {{b "text: title"}}></label>
-    <br />
-    {{>dynamicForm }}
+    <input {{b "value: testing123"}} type="text" style="width: 100%;box-sizing: border-box;">
+    {{#basicForm shared="pages"}}
+        {{>textInput field="title" shared="pages" style="width:50%;background:red;float:left"}}
+        {{>textInput field="test.test2" shared="pages" style="width:50%;background:red;float:left"}}
+        {{>textareaInput field="body" shared="pages" style="width:100%;background:red;display:inline-block"}}
+
+        {{#dynamicForm field="layout" shared="pages"}}
+            <!-- <button {{b "click: add('hero','layout.$.hero')"}}>Add Hero</button> -->
+            <!-- <button {{b "click: add('billboard','layout.$.billboard')"}}>Add Billboard</button> -->
+        {{/dynamicForm}}
+    {{/basicForm}}
+</template>
+
+<template name="basicForm">
+    <form id="hellojames">
+        <div id="name">
+            {{> UI.contentBlock data=this context=this}}
+        </div>
+        <button {{b "click: submit"}}>submit</button>
+    </form>
+</template>
+
+
+<template name="textInput">
+    <div class="{{class}}" style="{{style}}">
+        <div style="padding:5px">
+            <label>{{ssLabel}}</label>
+            <!-- <input {{b "value: ssDefaultValue(val(field))"}} type="text" style="width: 100%;box-sizing: border-box;"> -->
+            <input {{b "value: ssDefaultValue(val(field))"}} type="text" style="width: 100%;box-sizing: border-box;">
+        </div>
+    </div>
+</template>
+<template name="textareaInput">
+    <div class="{{class}}" style="{{style}}">
+        <div style="padding:5px">
+            <label>{{ssLabel}}</label>
+            <textarea {{b "value: ssDefaultValue(val(field))"}} style="width: 100%;box-sizing: border-box;" cols="40"></textarea>
+        </div>
+    </div>
 </template>
 
 <template name="dynamicForm">
     <button {{b "click: add('hero','layout.$.hero')"}}>Add Hero</button>
     <button {{b "click: add('billboard','layout.$.billboard')"}}>Add Billboard</button>
+    <!-- {{> UI.contentBlock data=child context=child}} -->
     <ul>
-    {{#each collection}}
-        {{> arrayItem}}
-    {{/each}}
+        {{#each collection}}
+            {{> arrayItem}}
+        {{/each}}
     </ul>
-    <button {{b "click: submit"}}>submit</button>
 </template>
 
 <template name="arrayItem">
     <li>
         <hr />
+        {{_id}}
         <button {{b "click: delete"}}>Del</button>
-        {{>Template.dynamic template=item data=(getData(_id)) }}
+        <button {{b "click: save(item)"}}>Save</button>
+        {{>Template.dynamic template=item data=(getData(this)) }}
         <hr />
     </li>
 </template>
@@ -38,7 +75,6 @@
         <div>hero Item:</div>
         <input {{b "value: title"}} type="text">
         <input {{b "value: alignment"}} type="text">
-        <button {{b "click: save('hero')"}}>Save</button>
     </div>
 </template>
 
@@ -47,6 +83,5 @@
         <div>billboard Item:</div>
         <input {{b "value: title"}} type="text">
         <input {{b "value: background"}} type="text">
-      <button {{b "click: save('billboard')"}}>Save</button>
     </div>
 </template>
