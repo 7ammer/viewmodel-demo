@@ -16,6 +16,7 @@ JSON.unflatten = function(data) {
     }
     return resultholder[""] || resultholder;
 };
+
 JSON.flatten = function(data) {
     var result = {};
     function recurse (cur, prop) {
@@ -23,22 +24,47 @@ JSON.flatten = function(data) {
             result[prop] = cur;
         } else if (Array.isArray(cur)) {
              for(var i=0, l=cur.length; i<l; i++)
-                 recurse(cur[i], prop + "[" + i + "]");
+                 recurse(cur[i], prop + "~" + i + "");
             if (l == 0)
                 result[prop] = [];
         } else {
             var isEmpty = true;
             for (var p in cur) {
                 isEmpty = false;
-                recurse(cur[p], prop ? prop+"."+p : p);
+                recurse(cur[p], prop ? prop+"~"+p : p);
             }
             if (isEmpty && prop)
                 result[prop] = {};
         }
     }
     recurse(data, "");
+    console.log(result);
     return result;
 }
+//
+// JSON.flatten = function(data) {
+//     var result = {};
+//     function recurse (cur, prop) {
+//         if (Object(cur) !== cur) {
+//             result[prop] = cur;
+//         } else if (Array.isArray(cur)) {
+//              for(var i=0, l=cur.length; i<l; i++)
+//                  recurse(cur[i], prop + "[" + i + "]");
+//             if (l == 0)
+//                 result[prop] = [];
+//         } else {
+//             var isEmpty = true;
+//             for (var p in cur) {
+//                 isEmpty = false;
+//                 recurse(cur[p], prop ? prop+"."+p : p);
+//             }
+//             if (isEmpty && prop)
+//                 result[prop] = {};
+//         }
+//     }
+//     recurse(data, "");
+//     return result;
+// }
 
 function createTemplateObjFromSchema(schema, pick){
     var ss;
@@ -116,16 +142,18 @@ if (Meteor.isClient) {
         ]
     });
 
+
+
     ViewModel.share({
-        pages:{
-            testing123: "this is a demo test that will be interesting if it works",
-            formDataFlattened: JSON.flatten(Pages.findOne({})),
-            formData: Pages,
-            schema: TestSchema
-        },
+        pages: JSON.flatten(Pages.findOne({})),
+        // {
+            // formData: Pages,
+            // schema: TestSchema
+        // },
         utils:{
             val(field){
-                return this.formDataFlattened()[field];
+                console.log(field, this);
+                return this[field]();
             },
             ssLabel: function(){
                 var field = this.templateInstance.data.field;
@@ -141,11 +169,19 @@ if (Meteor.isClient) {
             }
         }
     });
+
     Template.demoVM.viewmodel({
         onCreated: function() {
-            this.load({share:[this.templateInstance.data.shared, 'utils']});
+            this.load({share:['pages', 'utils']});
+        },
+        submit(){
+            this.body("gfds");
+            console.log(this.data());
+            event.preventDefault();
         }
     });
+
+
 
     Template.basicForm.viewmodel({
         onCreated: function() {

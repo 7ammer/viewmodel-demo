@@ -3,22 +3,34 @@
 </head>
 
 <body>
-  {{> demoVM field="test" shared="pages"}}
+  {{> demoVM }}
 </body>
 
 <template name="demoVM">
-    <input {{b "value: testing123"}} type="text" style="width: 100%;box-sizing: border-box;">
-    {{#basicForm shared="pages"}}
+    <input {{b "value: layout~2~item"}} type="text" style="width: 100%;box-sizing: border-box;">
+    <button {{b "click: submit"}}>submit</button>
+</template>
+
+
+<!-- <template name="demoVM">
+    <input {{b "value: val()"}} type="text" style="width: 100%;box-sizing: border-box;"> -->
+    <!-- {{#basicForm shared="pages"}}
         {{>textInput field="title" shared="pages" style="width:50%;background:red;float:left"}}
         {{>textInput field="test.test2" shared="pages" style="width:50%;background:red;float:left"}}
         {{>textareaInput field="body" shared="pages" style="width:100%;background:red;display:inline-block"}}
-
-        {{#dynamicForm field="layout" shared="pages"}}
+    -->
+        <!-- {{#dynamicForm field="layout" shared="pages"}} -->
             <!-- <button {{b "click: add('hero','layout.$.hero')"}}>Add Hero</button> -->
             <!-- <button {{b "click: add('billboard','layout.$.billboard')"}}>Add Billboard</button> -->
-        {{/dynamicForm}}
-    {{/basicForm}}
-</template>
+        <!-- {{/dynamicForm}} -->
+    <!-- {{/basicForm}} -->
+<!-- </template> -->
+
+
+
+
+
+
 
 <template name="basicForm">
     <form id="hellojames">
