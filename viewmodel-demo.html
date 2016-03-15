@@ -7,8 +7,19 @@
 </body>
 
 <template name="demoVM">
-    <input {{b "value: layout~2~item"}} type="text" style="width: 100%;box-sizing: border-box;">
+    <input {{b "value: tester('layout~3~item' this)"}} type="text" style="width: 100%;box-sizing: border-box;">
     <button {{b "click: submit"}}>submit</button>
+    <!-- {{#each collection}} -->
+        <!-- {{>Template.dynamic template=(getArrayVal 'layout~$~item' @index) }} -->
+    <!-- {{/each}} -->
+    {{#each staticFormData.layout}}
+        <hr />
+        <input {{b "value: this.item"}} type="text" name="name">
+        {{>Template.dynamic template=this.item data=this}}
+        <hr />
+    {{/each}}
+    <button type="button" {{b "click: add(hero)"}}>Add Hero</button>
+    <button type="button" {{b "click: add(billboard)"}}>Add Billboard</button>
 </template>
 
 
@@ -85,15 +96,15 @@
 <template name="hero">
     <div>
         <div>hero Item:</div>
-        <input {{b "value: title"}} type="text">
-        <input {{b "value: alignment"}} type="text">
+        <input {{b "value: this.hero.title"}} type="text">
+        <input {{b "value: this.hero.alignment"}} type="text">
     </div>
 </template>
 
 <template name="billboard">
     <div>
         <div>billboard Item:</div>
-        <input {{b "value: title"}} type="text">
-        <input {{b "value: background"}} type="text">
+        <input {{b "value: this.billboard.title"}} type="text">
+        <input {{b "value: this.billboard.background"}} type="text">
     </div>
 </template>

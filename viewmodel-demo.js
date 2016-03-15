@@ -2,13 +2,14 @@ JSON.unflatten = function(data) {
     "use strict";
     if (Object(data) !== data || Array.isArray(data))
         return data;
-    var regex = /\.?([^.\[\]]+)|\[(\d+)\]/g,
+    var regex = /\.?([^~\~\~]+)|\~(\d+)\~/g,
+    // var regex = /\.?([^.\[\]]+)|\[(\d+)\]/g,
         resultholder = {};
     for (var p in data) {
         var cur = resultholder,
             prop = "",
             m;
-        while (m = regex.exec(p)) {
+        while ((m = regex.exec(p))) {
             cur = cur[prop] || (cur[prop] = (m[2] ? [] : {}));
             prop = m[2] || m[1];
         }
@@ -25,46 +26,25 @@ JSON.flatten = function(data) {
         } else if (Array.isArray(cur)) {
              for(var i=0, l=cur.length; i<l; i++)
                  recurse(cur[i], prop + "~" + i + "");
-            if (l == 0)
+                //  recurse(cur[i], prop + "[" + i + "]");
+            if (l === 0)
                 result[prop] = [];
         } else {
             var isEmpty = true;
             for (var p in cur) {
                 isEmpty = false;
                 recurse(cur[p], prop ? prop+"~"+p : p);
+                // recurse(cur[p], prop ? prop+"."+p : p);
             }
             if (isEmpty && prop)
                 result[prop] = {};
         }
     }
     recurse(data, "");
-    console.log(result);
+    // console.log(result);
     return result;
-}
-//
-// JSON.flatten = function(data) {
-//     var result = {};
-//     function recurse (cur, prop) {
-//         if (Object(cur) !== cur) {
-//             result[prop] = cur;
-//         } else if (Array.isArray(cur)) {
-//              for(var i=0, l=cur.length; i<l; i++)
-//                  recurse(cur[i], prop + "[" + i + "]");
-//             if (l == 0)
-//                 result[prop] = [];
-//         } else {
-//             var isEmpty = true;
-//             for (var p in cur) {
-//                 isEmpty = false;
-//                 recurse(cur[p], prop ? prop+"."+p : p);
-//             }
-//             if (isEmpty && prop)
-//                 result[prop] = {};
-//         }
-//     }
-//     recurse(data, "");
-//     return result;
-// }
+};
+
 
 function createTemplateObjFromSchema(schema, pick){
     var ss;
@@ -142,14 +122,14 @@ if (Meteor.isClient) {
         ]
     });
 
-
+    var pagesShare;
+    pagesShare = JSON.flatten(Pages.findOne({}));
+    pagesShare.staticFormData = Pages.findOne({});
+    pagesShare.collection = Pages;
+    pagesShare.schema = TestSchema;
 
     ViewModel.share({
-        pages: JSON.flatten(Pages.findOne({})),
-        // {
-            // formData: Pages,
-            // schema: TestSchema
-        // },
+        pages: pagesShare,
         utils:{
             val(field){
                 console.log(field, this);
@@ -166,18 +146,61 @@ if (Meteor.isClient) {
                     var field = this.templateInstance.data.field;
                     return this.schema()._schema[field].defaultValue || "";
                 }
+            },
+            updateStaticFormData(data){
+                var self = this;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    console.log(self);
+                    // self.load(self.staticFormData(JSON.unflatten(data)) );
+                }, 400);
             }
         }
     });
 
+    var timer;
     Template.demoVM.viewmodel({
+        tester(val, val2){
+            console.log(val,val2);
+            // var d = Pages.findOne({});
+            // Pages.update({_id:"khds89g8"}, d);
+            // var flat = {};
+            // flat[val] = "hello world";
+            //
+            // var d = this.staticFormData.value;
+
+            // d.layout.push({test:"hello"});
+            // this.staticFormData(d);
+            // console.log(this.staticFormData.value);
+
+            //
+            // this.staticFormData(Pages.findOne());
+            // console.log(Pages.findOne({}));
+            // var test = _.extendOwn(d,newData);
+            // console.log(this.staticFormData());
+        },
         onCreated: function() {
             this.load({share:['pages', 'utils']});
         },
         submit(){
-            this.body("gfds");
-            console.log(this.data());
+            console.log(this.data().staticFormData);
             event.preventDefault();
+        },
+        layout(){
+            return Pages.findOne().layout;
+        },
+        add(){
+            Pages.update({_id:"khds89g8"}, this.staticFormData.value); // update current values
+            Pages.update({_id:"khds89g8"},{$push:{layout:{item:"hero"}}});
+            this.staticFormData(Pages.findOne());
+            console.log(this.staticFormData.value);
+        },
+        delete(id){
+            Pages.update({_id:"khds89g8"},this.staticFormData.value); // update current values
+            Pages.update({_id:"khds89g8"},{$push:{layout:{test:"test"}}});
+            var test = Pages.findOne();
+            this.staticFormData(test);
+            console.log(this.staticFormData.value);
         }
     });
 
