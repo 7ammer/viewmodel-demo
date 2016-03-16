@@ -3,24 +3,75 @@
 </head>
 
 <body>
-  {{> demoVM }}
+    {{>myForm shared="pages"}}
 </body>
 
-<template name="demoVM">
-    <input {{b "value: tester('layout~3~item' this)"}} type="text" style="width: 100%;box-sizing: border-box;">
+<template name="myForm">
+    {{>textInput shared="pages" ss="title" val=(b "value: formData.title") style="width:40%;background:red;float:left"}}
+    {{>textInput shared="pages" ss="url" val=(b "value: formData.url") style="width:40%;background:red;float:left"}}
+    {{>checkInput shared="pages" ss="active" val=(b "check: formData.active") style="width:20%;background:red;float:left"}}
+    {{>textareaInput shared="pages" ss="body" val=(b "value: formData.body") style="background:red;"}}
+    {{> dynamicCompsForm shared="pages"}}
     <button {{b "click: submit"}}>submit</button>
-    <!-- {{#each collection}} -->
-        <!-- {{>Template.dynamic template=(getArrayVal 'layout~$~item' @index) }} -->
-    <!-- {{/each}} -->
-    {{#each staticFormData.layout}}
+</template>
+
+<template name="dynamicCompsForm">
+    {{#each formData.layout}}
         <hr />
-        <input {{b "value: this.item"}} type="text" name="name">
+        <b>{{this.item}}</b>
+        <button type="button" {{b "click: delete(this._id)"}}>Del</button>
         {{>Template.dynamic template=this.item data=this}}
         <hr />
     {{/each}}
-    <button type="button" {{b "click: add(hero)"}}>Add Hero</button>
-    <button type="button" {{b "click: add(billboard)"}}>Add Billboard</button>
+    <div class="">
+        <button type="button" {{b "click: add('hero')"}}>Add Hero</button>
+        <button type="button" {{b "click: add('billboard')"}}>Add Billboard</button>
+    </div>
 </template>
+
+<template name="textInput">
+    <div class="{{class}}" style="{{style}}">
+        <div style="padding:5px">
+            <label>{{ssLabel ss}}</label>
+            <!-- <input {{b "value: ssDefaultValue(val(field))"}} type="text" style="width: 100%;box-sizing: border-box;"> -->
+            <input {{val}} type="text" style="width: 100%;box-sizing: border-box;">
+        </div>
+    </div>
+</template>
+
+<template name="checkInput">
+    <div class="{{class}}" style="{{style}}">
+        <div style="padding:5px">
+            <label for="check-{{ss}}">{{ssLabel ss}}</label><br />
+            <input {{val}} {{name}} type="checkbox" id="check-{{ss}}" />
+        </div>
+    </div>
+</template>
+
+<template name="textareaInput">
+    <div class="{{class}}" style="{{style}}">
+        <div style="padding:5px">
+            <label>{{ssLabel ss}}</label>
+            <textarea {{val}} style="width: 100%;box-sizing: border-box;" cols="40"></textarea>
+        </div>
+    </div>
+</template>
+
+<template name="hero">
+    <div>
+        {{>textInput shared="pages" ss="layout.$.hero.title" val=(b "value: this.hero.title") style=""}}
+        {{>textInput shared="pages" ss="layout.$.hero.alignment" val=(b "value: this.hero.alignment") style=""}}
+    </div>
+</template>
+
+<template name="billboard">
+    <div>
+        {{>textInput shared="pages" ss="layout.$.billboard.title" val=(b "value: this.billboard.title") style=""}}
+        {{>textInput shared="pages" ss="layout.$.billboard.background" val=(b "value: this.billboard.background") style=""}}
+    </div>
+</template>
+
+
 
 
 <!-- <template name="demoVM">
@@ -39,10 +90,6 @@
 
 
 
-
-
-
-
 <template name="basicForm">
     <form id="hellojames">
         <div id="name">
@@ -50,25 +97,6 @@
         </div>
         <button {{b "click: submit"}}>submit</button>
     </form>
-</template>
-
-
-<template name="textInput">
-    <div class="{{class}}" style="{{style}}">
-        <div style="padding:5px">
-            <label>{{ssLabel}}</label>
-            <!-- <input {{b "value: ssDefaultValue(val(field))"}} type="text" style="width: 100%;box-sizing: border-box;"> -->
-            <input {{b "value: ssDefaultValue(val(field))"}} type="text" style="width: 100%;box-sizing: border-box;">
-        </div>
-    </div>
-</template>
-<template name="textareaInput">
-    <div class="{{class}}" style="{{style}}">
-        <div style="padding:5px">
-            <label>{{ssLabel}}</label>
-            <textarea {{b "value: ssDefaultValue(val(field))"}} style="width: 100%;box-sizing: border-box;" cols="40"></textarea>
-        </div>
-    </div>
 </template>
 
 <template name="dynamicForm">
@@ -91,20 +119,4 @@
         {{>Template.dynamic template=item data=(getData(this)) }}
         <hr />
     </li>
-</template>
-
-<template name="hero">
-    <div>
-        <div>hero Item:</div>
-        <input {{b "value: this.hero.title"}} type="text">
-        <input {{b "value: this.hero.alignment"}} type="text">
-    </div>
-</template>
-
-<template name="billboard">
-    <div>
-        <div>billboard Item:</div>
-        <input {{b "value: this.billboard.title"}} type="text">
-        <input {{b "value: this.billboard.background"}} type="text">
-    </div>
 </template>

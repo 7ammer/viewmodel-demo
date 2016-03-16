@@ -45,7 +45,6 @@ JSON.flatten = function(data) {
     return result;
 };
 
-
 function createTemplateObjFromSchema(schema, pick){
     var ss;
     if(pick){
@@ -79,17 +78,13 @@ var hero = new SimpleSchema({
 var billboard = new SimpleSchema({
     title: { type: String, label:"Title"},
     background: { type: String, label:"Background"},
-    items: {type:[Object],label:"Items Group"},
-    'items.$.name': {type:String,label:"Item name"},
-    'items.$.number': {type:Number,label:"Items number"},
-    items2: {type:[String],label:"Items Group"},
-    'items2.$': {type:String,label:"Item String"},
 });
 
 TestSchema = new SimpleSchema({
     title: {type: String, label:"Title", defaultValue:"defaulting"},
+    url:{type: String, label:"url", defaultValue:"undefined"},
     body: {type: String, label:"Body", defaultValue:"defaulting"},
-    'test.test2': {type: String, label:"test2", defaultValue:"defaulting"},
+    active: {type: Boolean, label:"Active"},
     layout: {type:[Object],label:"layout"},
     'layout.$.item':{type:String, label: "Comp Name",defaultValue:"hello", allowedValues: ["hero","billboard"]},
     'layout.$.hero':{type:hero, label: "Hero"},
@@ -102,42 +97,30 @@ if (Meteor.isClient) {
         console.log("log: ", argument);
     });
 
-    // localColl = new Mongo.Collection(null);
-    // localColl.insert({item:"hero", hero:{title:"hello moon", alignment: "left"}});
-    // localColl.insert({item:"billboard", billboard:{title:"What's your favorite bar?", background:"Twix"}});
-    // localColl.insert({item:"hero", hero:{title:"hello sun", alignment: "top"}});
-
     Pages = new Mongo.Collection(null);
     Pages.insert({
-        _id:"khds89g8",
         title: "hello james",
         body: "body text here",
         test:{
             test2: "yo yo"
         },
-        layout:[
-            {_id:"gfds8089", item:"hero", hero:{title:"hello moon", alignment: "left"}},
-            {_id:"jhds8908", item:"billboard", billboard:{title:"What's your favorite bar?", background:"Twix"}},
-            {_id:"h8g9f090", item:"hero", hero:{title:"hello sun", alignment: "top"}}
-        ]
+        // layout:[
+            // {_id:"gfds8089", item:"hero", hero:{title:"hello moon", alignment: "left"}},
+            // {_id:"jhds8908", item:"billboard", billboard:{title:"What's your favorite bar?", background:"Twix"}},
+            // {_id:"h8g9f090", item:"hero", hero:{title:"hello sun", alignment: "top"}}
+        // ]
     });
 
-    var pagesShare;
-    pagesShare = JSON.flatten(Pages.findOne({}));
-    pagesShare.staticFormData = Pages.findOne({});
-    pagesShare.collection = Pages;
-    pagesShare.schema = TestSchema;
 
     ViewModel.share({
-        pages: pagesShare,
+        pages: {
+            formData: Pages.findOne({}),
+            collection: Pages,
+            schema: TestSchema
+        },
         utils:{
-            val(field){
-                console.log(field, this);
-                return this[field]();
-            },
-            ssLabel: function(){
-                var field = this.templateInstance.data.field;
-                return field, this.schema()._schema[field].label;
+            ssLabel: function(field){
+                return this.schema()._schema[field].label;
             },
             ssDefaultValue: function(liveValue){
                 if(liveValue){
@@ -146,65 +129,75 @@ if (Meteor.isClient) {
                     var field = this.templateInstance.data.field;
                     return this.schema()._schema[field].defaultValue || "";
                 }
-            },
-            updateStaticFormData(data){
-                var self = this;
-                clearTimeout(timer);
-                timer = setTimeout(function () {
-                    console.log(self);
-                    // self.load(self.staticFormData(JSON.unflatten(data)) );
-                }, 400);
             }
         }
     });
 
-    var timer;
-    Template.demoVM.viewmodel({
-        tester(val, val2){
-            console.log(val,val2);
-            // var d = Pages.findOne({});
-            // Pages.update({_id:"khds89g8"}, d);
-            // var flat = {};
-            // flat[val] = "hello world";
-            //
-            // var d = this.staticFormData.value;
-
-            // d.layout.push({test:"hello"});
-            // this.staticFormData(d);
-            // console.log(this.staticFormData.value);
-
-            //
-            // this.staticFormData(Pages.findOne());
-            // console.log(Pages.findOne({}));
-            // var test = _.extendOwn(d,newData);
-            // console.log(this.staticFormData());
-        },
+    Template.myForm.viewmodel({
         onCreated: function() {
-            this.load({share:['pages', 'utils']});
+            this.load({share:[this.templateInstance.data.shared, 'utils']});
+            var localColl = new Mongo.Collection(null);
+            var data = this.collection().findOne();
+            localColl.insert(data);
+            this.collection(localColl);
+            this.formData(data);
         },
         submit(){
-            console.log(this.data().staticFormData);
+            console.log(this.data().formData);
             event.preventDefault();
-        },
-        layout(){
-            return Pages.findOne().layout;
-        },
-        add(){
-            Pages.update({_id:"khds89g8"}, this.staticFormData.value); // update current values
-            Pages.update({_id:"khds89g8"},{$push:{layout:{item:"hero"}}});
-            this.staticFormData(Pages.findOne());
-            console.log(this.staticFormData.value);
-        },
-        delete(id){
-            Pages.update({_id:"khds89g8"},this.staticFormData.value); // update current values
-            Pages.update({_id:"khds89g8"},{$push:{layout:{test:"test"}}});
-            var test = Pages.findOne();
-            this.staticFormData(test);
-            console.log(this.staticFormData.value);
         }
     });
 
+    Template.dynamicCompsForm.viewmodel({
+        onCreated: function() {
+            this.load({share:[this.templateInstance.data.shared, 'utils']});
+        },
+        add(comp, schemaName){
+            // var objTml = createTemplateObjFromSchema(this.schema(), 'layout.$.hero').layout[0][comp];
+            this.collection().update({_id: this.formData()._id},this.formData.value); // update current values
+            this.collection().update({_id: this.formData()._id},{$push:{layout:{_id: Math.random(),item:comp,[comp]:{}}}});
+            this.formData(this.collection().findOne());
+            console.log(this.formData.value);
+        },
+        delete(val){
+            this.collection().update({_id: this.formData()._id},this.formData.value); // update current values
+            this.collection().update({_id: this.formData()._id}, {$pull: {
+                'layout': {'_id': val}
+            }});
+            this.formData(this.collection().findOne());
+            console.log(this.formData.value);
+        }
+    });
 
+    Template.hero.viewmodel({
+        onCreated() {
+            this.load({share:['pages', 'utils']});
+        },
+    });
+
+    Template.billboard.viewmodel({
+        onCreated() {
+            this.load({share:['pages', 'utils']});
+        },
+    });
+
+    Template.textInput.viewmodel({
+        onCreated: function() {
+            this.load({share:[this.templateInstance.data.shared, 'utils']});
+        }
+    });
+
+    Template.checkInput.viewmodel({
+        onCreated: function() {
+            this.load({share:[this.templateInstance.data.shared, 'utils']});
+        }
+    });
+
+    Template.textareaInput.viewmodel({
+        onCreated: function() {
+            this.load({share:[this.templateInstance.data.shared, 'utils']});
+        }
+    });
 
     Template.basicForm.viewmodel({
         onCreated: function() {
@@ -216,20 +209,6 @@ if (Meteor.isClient) {
         }
     });
 
-    Template.textInput.viewmodel({
-        onCreated: function() {
-            this.load({share:[this.templateInstance.data.shared, 'utils']});
-        },
-        // onRendered(){
-        //     console.log(this);
-        // }
-    });
-
-    Template.textareaInput.viewmodel({
-        onCreated: function() {
-            this.load({share:[this.templateInstance.data.shared, 'utils']});
-        }
-    });
 
     //TODO on create of this template create a localCollection and add only the needed field into it
         // this.formData().find({},{fields:{layout:1}})
